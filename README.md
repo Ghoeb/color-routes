@@ -10,3 +10,17 @@ _If (u,v) is an edge on the graph, then the nodes u and v have the same color as
 _All nodes on the graph have a color assigned_
 
 _All nodes have their desired degree_
+
+## Dependencies
+
+This program depends on Gtk+ 3.0 to work 
+
+## Running the program
+
+Compile with
+
+```
+make
+```
+
+
