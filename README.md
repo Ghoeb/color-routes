@@ -13,7 +13,7 @@ _All nodes have their desired degree_
 
 ## Dependencies
 
-This program depends on Gtk+ 3.0 to work 
+This program depends on Gtk+ 3.0
 
 ## Running the program
 
@@ -23,4 +23,9 @@ Compile with
 make
 ```
 
+Run with
+
+```
+./solver_h < tests/* | ./watcher
+```
 
