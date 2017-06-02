@@ -4,6 +4,8 @@ Repository for experimenting with backtracking and enhancements to a graph edge 
 
 Written to use as an assignment on the 2016-1 edition of Data Structures & Algorithms course at PUC, Chile
 
+(This was my first big C project, and I plan to keep working on it)
+
 ## The problem
 
 Given an edgeless graph where nodes have a specific desired degree, and some nodes have a color assigned while others don't, set the edges to satisfy the following:
@@ -30,7 +32,7 @@ make
 
 on the terminal.
 
-They all depend on eachother to work, so i'll explain them in call order.
+They all depend on eachother to work, so I'll explain them in call order.
 
 ### Generator
 
