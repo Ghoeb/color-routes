@@ -8,6 +8,7 @@
 #include "stage3.h"
 #include "stage4.h"
 #include "stage5.h"
+#include <string.h>
 
 /** Inicializa un grafo a partir de un BMP */
 /* El canal azul indica como expandir las celdas */
@@ -118,21 +119,31 @@ int main(int argc, char** argv)
 
     debug = false;
     char* filename;
-    if(argc >= 2)
+    if(argc >= 3)
     {
-        filename = argv[1];
-        if(argc >= 3)
-        {
-            srand(atoi(argv[2]));
-            if(argc >= 4)
-            {
-                debug = true;
-            }
-        }
+      filename = argv[1];
+      srand(atoi(argv[2]));
+      if(argc == 4)
+      {
+				if(!strcmp(argv[3], "-d"))
+				{
+					debug = true;
+				}
+				else
+				{
+					printf("Usage: %s <bmp> [seed] [-d]\n", argv[0]);
+	        return 1;
+				}
+      }
+			else
+			{
+				printf("Usage: %s <bmp> [seed] [-d]\n", argv[0]);
+				return 1;
+			}			
     }
     else
     {
-        printf("Usage: %s <bmp> <seed?> <debug?>\n", argv[0]);
+        printf("Usage: %s <bmp> [seed] [-d]\n", argv[0]);
         return 1;
     }
 

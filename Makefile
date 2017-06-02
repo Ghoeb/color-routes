@@ -2,99 +2,129 @@
 #                             Makefile Múltiple                               #
 #                                                                             #
 # Por Vicente Errázuriz                                                       #
-# Para el curso de Estructuras de Datos y Algoritmos, 2016 - 1, PUC           #
+# Para el curso de Estructuras de Datos y Algoritmos, 2017 - 1, PUC           #
 # Makefile diseñada para el trabajo de varios programas con código común      #
 ###############################################################################
 
-# Indica que se debe parsear el archivo dos veces
-.SECONDEXPANSION:
-
 # El compilador a usar: Gnu C Compiler, Standard 2011 with GNU extensions
 CC=gcc -std=gnu11
+# La carpeta donde va todo el código
+SRC=src
+# La carpeta donde van todos los archivos de objeto
+OBJ=obj
+###############################################################################
+# OPTIMIZACIÓN POR COMPILADOR (descomenta el que necesites, comenta el otro)  #
+###############################################################################
 
-# Parametros para el compilador
+OPT=-g # Guardar toda la información para poder debugear. No optimiza
+# OPT=-O3 # Optimiza al máximo, descarta toda la información de debug.
+
+###############################################################################
+# PARÁMETROS                                                                  #
+###############################################################################
+
 # -Wunused = (Warn Unused) Da aviso de las variables que no se estan usando
 # -Wall    = (Warn All) Da aviso de todos los posibles errores de compilación
-# -O3      = Optimizaciones nivel 3
-# -I.      = (Include .) Que busque los headers en el directorio actual
-CFLAGS=-Wunused -Wall -O0 -I.
+# $(OPT)   = Nivel de optimización
+CFLAGS=-Wunused -Wall $(OPT)
 
-# Parametros para poder compilar aplicaciones con interfaz gráfica GTK+
-GTKFLAGS=`pkg-config --cflags --libs gtk+-3.0`
+###############################################################################
+# LIBRERÍAS                                                                   #
+###############################################################################
 
-# Librerias que deben ser linkeadas al proyecto para poder compilar
-# m = C Math library
-LIB=-lm
+# Matemáticas (C Math library)
+MTH=-lm
+# Interfaz gráfica GTK+
+GTK=`pkg-config --cflags --libs gtk+-3.0`
+# Manejo de imagenes PNG (Portable Network Graphics)
+PNG=-lpng
 
-# Los programas de los que esta makefile se hace cargo
-PROGRAMS=generator watcher solver_e solver_n solver_h solver_l judge
+LIB=$(PNG) $(GTK) $(MTH)
 
-# Todos los .h del proyecto
-DEPS=$(foreach i, common $(PROGRAMS), $(wildcard src/$(i)/*.h))
+###############################################################################
+# MÓDULOS Y PROGRAMAS                                                         #
+###############################################################################
 
-# Regla de substitucion para encontrar los archivos .c
-SUBST=$(patsubst src/%.c, obj/%.o, $(wildcard src/$(i)/*.c))
+# Directorios con elementos de uso común
+COMMON=common
 
-# Archivos de objeto, un estado intermedio de compilación
-# Por cada .c dentro de src/X, se crea un .o dentro de obj/X
-OBJ=$(foreach i, common $(PROGRAMS), $(SUBST))
+# Directorios que serán compilados a un programa
+PROGRAMS=watcher generator solver_h
 
-# Los directorios para los archivos de objeto
-OBJDIR=obj $(foreach i, common $(PROGRAMS), obj/$(i))
+# Todos los directorios que contienen archivos de código
+SRCDIR=$(COMMON) $(PROGRAMS)
 
+###############################################################################
+# DEPENDENCIAS Y DIRECTORIOS                                                  #
+###############################################################################
 
-# Al llamar make a secas se ejecutará esta regla, ya que es la primera
-# Llamar a las reglas respectivas para cada uno de los elementos en OBJDIR
-# para que creen las carpetas para guardar los archivos de objeto
-# Llamar a las reglas respectivas con cada uno de los elementos en PROGRAMS
-# para que compilen cada uno de los programas
-# Las otras reglas se pueden llamar con make <regla>. Ej: make clean
+# Todos los archivos .h de las carpetas comunes
+DEPS := $(foreach i, $(COMMON), $(shell find $(SRC)/$(i) -name '*.h'))
+
+# Todos los archivos .h
+HDRFILES := $(shell find $(SRC) -name '*.h')
+
+# Todos los archivos .c
+SRCFILES := $(shell find $(SRC) -name '*.c')
+
+# Archivos de objeto .o, un estado intermedio de compilación
+OBJFILES := $(foreach i, $(SRCFILES), $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(i)))
+
+# Los directorios para los archivos de objeto .o
+OBJDIR := $(patsubst $(SRC)/%, $(OBJ)/%, $(shell find $(SRC) -type d))
+
+###############################################################################
+# REGLAS                                                                      #
+###############################################################################
+
+# Las reglas son como funciones.
+# Cuando llamas 'make X' en la consola, se ejecuta la regla X.
+# Las reglas tienen prerrequisitos: esto es lo que aparece a su derecha
+# Una vez se cumplan los prerrequisitos, se ejecuta el contenido de la regla
+# Si llamas 'make' a secas se ejecutará la primera regla: 'all'
+
+# Esta regla imprime que todo está listo
+# Pero solo una vez que se hayan llamado las reglas $(OBJDIR) y $(PROGRAMS)
 all: $(OBJDIR) $(PROGRAMS)
 	@echo "done compiling"
 
-# Regla que especifíca como compilar los archivos de objeto
-# %.o se compila a partir de %.c guardado en src/ (% incluye la carpeta)
-# TODO Idealmente esto solo debería usar los .h en la carpeta especificada
-obj/%.o: src/%.c $(DEPS)
-	@$(CC) $(CFLAGS) $< -c -o $@ $(GTKFLAGS) $(LIB) 						  \
-	&& echo "compilado $@"
+# Esta regla elimina todo registro de compilación que se haya hecho
+clean:
+	@rm -fv $(PROGRAMS) && rm -rfv obj && echo "done cleaning"
 
-# Regla que conecta todas las partes del programa a partir de los objetos
-# Conecta tambien los demás archivos que hayan en la carpeta del programa
-# Esta regla se llamará con cualquiera de los elementos que está en PROGRAMS
-# Esta regla necesita SECONDEXPANSION para poder armar los prerrequisitos
-$(PROGRAMS): $$(filter obj/$$@/% obj/common/%, $(OBJ))
-	@$(CC) $(CFLAGS) $^ -o $@ $(GTKFLAGS) $(LIB) 		  \
-	&& echo "compilado $@"
-
-# Regla que elimina todo registro de compilación que se haya hecho
-clean: cleanobj cleanexe
-	@echo "done cleaning"
-
-# Regla que elimina la versión anterior compilada
-# "rm" para unix, "del" para windows. Eres libre de borrar el que no te sirva
-cleanexe:
-	@for i in $(PROGRAMS); do 		# Para cada uno de los programas          \
-		if [ -e $$i ]; then 		# Si es que existe              		  \
-			rm $$i || del $$i.exe; 	# Lo elimina 							  \
-			echo "eliminado $$i"; 	# Y lo notifica 						  \
-		fi; 																  \
-	done
-
-# Regla que elimina los archivos de objeto .o
-# "rm" para unix, "del" para windows. Eres libre de borrar el que no te sirva
-cleanobj:
-	@for i in $(OBJ); do	  	  # Para cada uno de los archivos de objeto   \
-		if [ -e $$i ]; then		  # Si es que existe 						  \
-			rm $$i || del $$i; 	  # Lo elimina 								  \
-			echo "eliminado $$i"; # Y lo notifica 							  \
-		fi; 																  \
-	done
-
-# Regla encargada de crear los directorios para guardar los archivos de objeto
+# Esta regla crea los directorios donde se guardan los archivos de objeto .o
 $(OBJDIR):
-	@mkdir $@
+	@mkdir -p $@
+
+# Esta regla mágica indica que las siguientes reglas necesitan dos pasadas
+# Qué significa eso y por qué es importante no tiene importancia
+.SECONDEXPANSION:
+
+# Dependencias locales para un archivo .o
+LOCAL_DEPS = $(filter $(patsubst $(OBJ)/%, $(SRC)/%, $(dir $(1)))%, $(HDRFILES))
+
+# Esta regla compila cada archivo de objeto .o
+# Pero sólo si alguno de los siguientes fue modificado desde la última vez
+## el .c respectivo del .o
+## algún .h bajo la carpeta respectiva en src
+## algún .h de los directorios comunes
+## esta mismísima Makefile
+obj/%.o: src/%.c $$(call LOCAL_DEPS,$$@) $(DEPS) Makefile
+	@$(CC) $(CFLAGS) $< -c -o $@ $(LIB) && echo "compiled '$@'"
+
+# Esta regla conecta y compila cada programa a partir de los .o
+# Pero solo una vez que se haya llamado la regla anterior con lo siguiente
+## todos los .o de la carpeta respectiva del programa
+## todos los .o de los directorios comunes
+$(PROGRAMS): $$(filter obj/$$@/% $(foreach i, $(COMMON), obj/$(i)/%), $(OBJFILES))
+	@$(CC) $(CFLAGS) $^ -o $@ $(LIB) && echo "compiled '$@'"
 
 ###############################################################################
 #                   Cualquier duda no temas en preguntar!                     #
+###############################################################################
+# Disclaimer:                                                                 #
+#                                                                             #
+# Deberías modificar solamente el nivel de Optimización (OPT, linea 13).      #
+# Modificar la Makefile si no sabes lo que está pasando o como la usamos los  #
+# ayudantes puede resultar en un perjuicio en la evaluación de tu código.     #
 ###############################################################################
