@@ -42,9 +42,11 @@ Run with
 ./generator <bmp> <seed> [-d]
 ```
 
-<bmp> is the bmp file to base the puzzle on
-<seed> is the random seed for the puzzle
-[-d] is the debug flag. Show every step taken by the generator. Only makes sense if passing `stdout` to the `watcher`.
+`<bmp>` is the bmp file to base the puzzle on
+
+`<seed>` is the random seed for the puzzle
+
+`[-d]` is the debug flag. Show every step taken by the generator. Only makes sense if passing `stdout` to the `watcher`.
 
 ### Solver
 
@@ -56,7 +58,7 @@ Run with
 ./solver_h [-s]
 ```
 
-[-s] is to print every step taken by the algorithm. Use this to see the undos
+`[-s]` is to print every step taken by the algorithm. Use this to see the undos
 
 ### Watcher
 
@@ -68,8 +70,9 @@ Run with
 ./watcher [-u] [timestep]
 ```
 
-[-u] is to show the underlying graph of the problem.
-[timestep] is to regulate the pause between 2 updates to the window.
+`[-u]` is to show the underlying graph of the problem.
+
+`[timestep]` is to regulate the pause between 2 updates to the window.
 
 ### All together
 
@@ -81,4 +84,6 @@ The idea is to join the 3 programs together
 
 or
 
+```
 ./generator <bmp> <seed> [-d] | ./watcher [-u]
+```
