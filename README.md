@@ -4,7 +4,7 @@ Repository for experimenting with backtracking and enhancements to a graph edge 
 
 Written to use as an assignment on the 2016-1 edition of Data Structures & Algorithms course at PUC, Chile
 
-(This was my first big C project, and I plan to keep working on it)
+(This was my first big C project, and I plan to keep working on it and cleaning it up)
 
 ## The problem
 
