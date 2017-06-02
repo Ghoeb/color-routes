@@ -121,9 +121,12 @@ int main(int argc, char** argv)
     char* filename;
     if(argc >= 3)
     {
-      filename = argv[1];
-      srand(atoi(argv[2]));
-      if(argc == 4)
+			if(argc == 3)
+			{
+				filename = argv[1];
+				srand(atoi(argv[2]));
+			}
+			else if(argc == 4)
       {
 				if(!strcmp(argv[3], "-d"))
 				{
@@ -131,19 +134,19 @@ int main(int argc, char** argv)
 				}
 				else
 				{
-					printf("Usage: %s <bmp> [seed] [-d]\n", argv[0]);
+					printf("Usage: %s <bmp> <seed> [-d]\n", argv[0]);
 	        return 1;
 				}
       }
 			else
 			{
-				printf("Usage: %s <bmp> [seed] [-d]\n", argv[0]);
+				printf("Usage: %s <bmp> <seed> [-d]\n", argv[0]);
 				return 1;
-			}			
+			}
     }
     else
     {
-        printf("Usage: %s <bmp> [seed] [-d]\n", argv[0]);
+        printf("Usage: %s <bmp> <seed> [-d]\n", argv[0]);
         return 1;
     }
 
